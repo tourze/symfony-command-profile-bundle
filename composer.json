@@ -1,0 +1,35 @@
+{
+  "name": "tourze/symfony-command-profile-bundle",
+  "description": "",
+  "type": "symfony-bundle",
+  "license": "MIT",
+  "require": {
+    "php": "^8.1",
+    "psr/log": "^3|^2|^1",
+    "nesbot/carbon": "^2.72 || ^3",
+    "symfony/service-contracts": "^2.5 || ^3",
+    "symfony/config": "^6.4",
+    "symfony/dependency-injection": "^6.4",
+    "symfony/http-kernel": "^6.4",
+    "symfony/framework-bundle": "^6.4",
+    "symfony/event-dispatcher": "^6.4",
+    "symfony/console": "^6.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "Tourze\\CommandProfileBundle\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tourze\\CommandProfileBundle\\Tests\\": "tests"
+    }
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^10.0",
+    "phpstan/phpstan": "^2.1"
+  },
+  "scripts": {
+    "phpstan": "phpstan analyse src -l 1"
+  }
+}
