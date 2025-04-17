@@ -1,0 +1,1 @@
+# symfony-command-profile-bundle
