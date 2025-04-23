@@ -28,7 +28,7 @@ class CommandProfileSubscriber implements ResetInterface
     #[AsEventListener(event: ConsoleEvents::TERMINATE)]
     public function onTerminate(ConsoleTerminateEvent $event): void
     {
-        $runTime = Carbon::now(date_default_timezone_get())->floatDiffInSeconds($this->startTime);
+        $runTime = Carbon::now(date_default_timezone_get())->diffInSeconds($this->startTime);
         $output = $event->getOutput();
         $output->writeln('');
         $output->writeln("RunTime: {$runTime}");
