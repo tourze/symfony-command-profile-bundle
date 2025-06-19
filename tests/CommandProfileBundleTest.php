@@ -24,6 +24,7 @@ class CommandProfileBundleTest extends TestCase
         $container = new ContainerBuilder();
 
         // 调用build方法不应抛出异常
-        $this->assertNull($bundle->build($container));
+        $bundle->build($container);
+        $this->assertTrue(true); // 如果没有异常抛出，测试通过
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Tourze\CommandProfileBundle\Tests\EventSubscriber;
 
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
@@ -24,14 +24,14 @@ class CommandProfileSubscriberTest extends TestCase
 
     protected function tearDown(): void
     {
-        Carbon::setTestNow(); // 重置测试时间
+        CarbonImmutable::setTestNow(); // 重置测试时间
     }
 
     public function testOnCommand(): void
     {
         // 设置固定的测试时间
-        $testTime = Carbon::create(2023, 1, 1, 12, 0, 0);
-        Carbon::setTestNow($testTime);
+        $testTime = CarbonImmutable::create(2023, 1, 1, 12, 0, 0);
+        CarbonImmutable::setTestNow($testTime);
 
         $input = $this->createMock(InputInterface::class);
         $command = $this->createMock(Command::class);
@@ -52,8 +52,8 @@ class CommandProfileSubscriberTest extends TestCase
     public function testOnTerminate(): void
     {
         // 设置结束时间先，让后面的开始时间更晚，确保得到正数结果
-        $endTime = Carbon::create(2023, 1, 1, 12, 0, 0);
-        Carbon::setTestNow($endTime);
+        $endTime = CarbonImmutable::create(2023, 1, 1, 12, 0, 0);
+        CarbonImmutable::setTestNow($endTime);
 
         $input = $this->createMock(InputInterface::class);
         $command = $this->createMock(Command::class);
@@ -78,7 +78,7 @@ class CommandProfileSubscriberTest extends TestCase
             });
 
         // 设置开始时间，比结束时间早 5 秒
-        $startTime = Carbon::create(2023, 1, 1, 11, 59, 55);
+        $startTime = CarbonImmutable::create(2023, 1, 1, 11, 59, 55);
 
         // 使用反射设置 startTime 属性
         $reflection = new \ReflectionClass($this->subscriber);
@@ -92,7 +92,7 @@ class CommandProfileSubscriberTest extends TestCase
     public function testReset(): void
     {
         // 设置固定的测试时间
-        Carbon::setTestNow(Carbon::create(2023, 1, 1, 12, 0, 0));
+        CarbonImmutable::setTestNow(CarbonImmutable::create(2023, 1, 1, 12, 0, 0));
 
         $input = $this->createMock(InputInterface::class);
         $command = $this->createMock(Command::class);

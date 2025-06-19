@@ -2,7 +2,7 @@
 
 namespace Tourze\CommandProfileBundle\EventSubscriber;
 
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
@@ -22,13 +22,13 @@ class CommandProfileSubscriber implements ResetInterface
     #[AsEventListener(event: ConsoleEvents::COMMAND)]
     public function onCommand(ConsoleCommandEvent $event): void
     {
-        $this->startTime = Carbon::now(date_default_timezone_get());
+        $this->startTime = CarbonImmutable::now(date_default_timezone_get());
     }
 
     #[AsEventListener(event: ConsoleEvents::TERMINATE)]
     public function onTerminate(ConsoleTerminateEvent $event): void
     {
-        $runTime = Carbon::now(date_default_timezone_get())->diffInSeconds($this->startTime);
+        $runTime = CarbonImmutable::now(date_default_timezone_get())->diffInSeconds($this->startTime);
         $output = $event->getOutput();
         $output->writeln('');
         $output->writeln("RunTime: {$runTime}");
