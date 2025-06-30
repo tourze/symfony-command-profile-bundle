@@ -14,7 +14,7 @@ use Symfony\Contracts\Service\ResetInterface;
 /**
  * 用于在命令执行成功后，打印出最终的耗时情况
  */
-#[AutoconfigureTag('as-coroutine')]
+#[AutoconfigureTag(name: 'as-coroutine')]
 class CommandProfileSubscriber implements ResetInterface
 {
     private ?CarbonInterface $startTime = null;
