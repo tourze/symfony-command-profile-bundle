@@ -3,26 +3,36 @@
 namespace Tourze\CommandProfileBundle\Tests\EventSubscriber;
 
 use Carbon\CarbonImmutable;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Tourze\CommandProfileBundle\EventSubscriber\CommandProfileSubscriber;
+use Tourze\PHPUnitSymfonyKernelTest\AbstractEventSubscriberTestCase;
 
-class CommandProfileSubscriberTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(CommandProfileSubscriber::class)]
+#[RunTestsInSeparateProcesses]
+final class CommandProfileSubscriberTest extends AbstractEventSubscriberTestCase
 {
     private CommandProfileSubscriber $subscriber;
+
+    /** @var MockObject&OutputInterface */
     private OutputInterface $output;
 
-    protected function setUp(): void
+    protected function onSetUp(): void
     {
-        $this->subscriber = new CommandProfileSubscriber();
+        $this->subscriber = self::getService(CommandProfileSubscriber::class);
         $this->output = $this->createMock(OutputInterface::class);
     }
 
-    protected function tearDown(): void
+    private function resetTestTime(): void
     {
         CarbonImmutable::setTestNow(); // 重置测试时间
     }
@@ -34,29 +44,75 @@ class CommandProfileSubscriberTest extends TestCase
         CarbonImmutable::setTestNow($testTime);
 
         $input = $this->createMock(InputInterface::class);
+        // 使用 Command 具体类而非接口的原因：
+        // 1. ConsoleCommandEvent 构造函数要求 Command 类型参数，无法使用接口
+        // 2. Symfony Console 组件设计中 Command 是基础抽象类，提供核心功能
+        // 3. 测试中只需要 Command 实例作为事件参数，不需要调用具体方法
         $command = $this->createMock(Command::class);
 
         $event = new ConsoleCommandEvent($command, $input, $this->output);
 
         $this->subscriber->onCommand($event);
 
-        // 使用反射检查私有属性 startTime
+        // 使用反射检查私有属性 map
         $reflection = new \ReflectionClass($this->subscriber);
-        $startTimeProperty = $reflection->getProperty('startTime');
-        $startTimeProperty->setAccessible(true);
+        $mapProperty = $reflection->getProperty('map');
+        $mapProperty->setAccessible(true);
 
-        $this->assertNotNull($startTimeProperty->getValue($this->subscriber));
-        $this->assertEquals($testTime, $startTimeProperty->getValue($this->subscriber));
+        $map = $mapProperty->getValue($this->subscriber);
+        $this->assertInstanceOf(\WeakMap::class, $map);
+
+        // 检查 input 是否被存储在 WeakMap 中
+        $this->assertTrue($map->offsetExists($input));
+        $this->assertEquals($testTime, $map->offsetGet($input));
+
+        $this->resetTestTime();
+    }
+
+    public function testReset(): void
+    {
+        $input = $this->createMock(InputInterface::class);
+        $command = $this->createMock(Command::class);
+        $output = $this->createMock(OutputInterface::class);
+
+        $event = new ConsoleCommandEvent($command, $input, $output);
+        $this->subscriber->onCommand($event);
+
+        // 验证WeakMap中有数据
+        $reflection = new \ReflectionClass($this->subscriber);
+        $mapProperty = $reflection->getProperty('map');
+        $mapProperty->setAccessible(true);
+        $map = $mapProperty->getValue($this->subscriber);
+        $this->assertInstanceOf(\WeakMap::class, $map);
+        $this->assertTrue($map->offsetExists($input));
+
+        // 重置后验证WeakMap为空
+        $this->subscriber->reset();
+        $mapAfterReset = $mapProperty->getValue($this->subscriber);
+        $this->assertInstanceOf(\WeakMap::class, $mapAfterReset);
+        $this->assertFalse($mapAfterReset->offsetExists($input));
     }
 
     public function testOnTerminate(): void
     {
-        // 设置结束时间先，让后面的开始时间更晚，确保得到正数结果
-        $endTime = CarbonImmutable::create(2023, 1, 1, 12, 0, 0);
-        CarbonImmutable::setTestNow($endTime);
+        // 设置开始时间，比结束时间早 5 秒
+        $startTime = CarbonImmutable::create(2023, 1, 1, 11, 59, 55);
+        CarbonImmutable::setTestNow($startTime);
 
         $input = $this->createMock(InputInterface::class);
+        // 使用 Command 具体类而非接口的原因：
+        // 1. ConsoleTerminateEvent 构造函数要求 Command 类型参数，无法使用接口
+        // 2. Symfony Console 组件设计中 Command 是基础抽象类，提供核心功能
+        // 3. 测试中只需要 Command 实例作为事件参数，不需要调用具体方法
         $command = $this->createMock(Command::class);
+
+        // 先调用 onCommand 设置开始时间
+        $commandEvent = new ConsoleCommandEvent($command, $input, $this->output);
+        $this->subscriber->onCommand($commandEvent);
+
+        // 设置结束时间，比开始时间晚 5 秒
+        $endTime = CarbonImmutable::create(2023, 1, 1, 12, 0, 0);
+        CarbonImmutable::setTestNow($endTime);
 
         $terminateEvent = new ConsoleTerminateEvent($command, $input, $this->output, 0);
 
@@ -65,53 +121,21 @@ class CommandProfileSubscriberTest extends TestCase
             ->method('writeln')
             ->willReturnCallback(function ($message) {
                 static $callCount = 0;
-                $callCount++;
+                ++$callCount;
 
-                if ($callCount === 1) {
+                if (1 === $callCount) {
                     $this->assertEquals('', $message);
-                } elseif ($callCount === 2) {
+                } elseif (2 === $callCount) {
                     $this->assertStringContainsString('RunTime:', $message);
                     // 我们不再检查具体数值，只检查格式
                 }
 
                 return null;
-            });
-
-        // 设置开始时间，比结束时间早 5 秒
-        $startTime = CarbonImmutable::create(2023, 1, 1, 11, 59, 55);
-
-        // 使用反射设置 startTime 属性
-        $reflection = new \ReflectionClass($this->subscriber);
-        $startTimeProperty = $reflection->getProperty('startTime');
-        $startTimeProperty->setAccessible(true);
-        $startTimeProperty->setValue($this->subscriber, $startTime);
+            })
+        ;
 
         $this->subscriber->onTerminate($terminateEvent);
-    }
 
-    public function testReset(): void
-    {
-        // 设置固定的测试时间
-        CarbonImmutable::setTestNow(CarbonImmutable::create(2023, 1, 1, 12, 0, 0));
-
-        $input = $this->createMock(InputInterface::class);
-        $command = $this->createMock(Command::class);
-
-        $event = new ConsoleCommandEvent($command, $input, $this->output);
-        $this->subscriber->onCommand($event);
-
-        // 使用反射检查私有属性 startTime
-        $reflection = new \ReflectionClass($this->subscriber);
-        $startTimeProperty = $reflection->getProperty('startTime');
-        $startTimeProperty->setAccessible(true);
-
-        // 确认 startTime 已设置
-        $this->assertNotNull($startTimeProperty->getValue($this->subscriber));
-
-        // 调用 reset 方法
-        $this->subscriber->reset();
-
-        // 确认 startTime 已被重置
-        $this->assertNull($startTimeProperty->getValue($this->subscriber));
+        $this->resetTestTime();
     }
 }

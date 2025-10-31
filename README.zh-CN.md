@@ -3,8 +3,11 @@
 [English](README.md) | [中文](README.zh-CN.md)
 
 [![Latest Version](https://img.shields.io/packagist/v/tourze/symfony-command-profile-bundle.svg?style=flat-square)](https://packagist.org/packages/tourze/symfony-command-profile-bundle)
+[![PHP Version](https://img.shields.io/packagist/php-v/tourze/symfony-command-profile-bundle.svg?style=flat-square)](https://packagist.org/packages/tourze/symfony-command-profile-bundle)
+[![License](https://img.shields.io/packagist/l/tourze/symfony-command-profile-bundle.svg?style=flat-square)](https://packagist.org/packages/tourze/symfony-command-profile-bundle)
 [![Build Status](https://img.shields.io/travis/tourze/symfony-command-profile-bundle/master.svg?style=flat-square)](https://travis-ci.org/tourze/symfony-command-profile-bundle)
 [![Quality Score](https://img.shields.io/scrutinizer/g/tourze/symfony-command-profile-bundle.svg?style=flat-square)](https://scrutinizer-ci.com/g/tourze/symfony-command-profile-bundle)
+[![Code Coverage](https://img.shields.io/scrutinizer/coverage/g/tourze/symfony-command-profile-bundle.svg?style=flat-square)](https://scrutinizer-ci.com/g/tourze/symfony-command-profile-bundle)
 [![Total Downloads](https://img.shields.io/packagist/dt/tourze/symfony-command-profile-bundle.svg?style=flat-square)](https://packagist.org/packages/tourze/symfony-command-profile-bundle)
 
 一个用于 Symfony 的 Bundle，可以在每次 Console 命令执行后自动输出本次运行的耗时，帮助你分析自定义或内置命令的性能表现。
@@ -44,7 +47,7 @@ php bin/console your:command
 
 命令执行结束后，终端会自动输出类似如下的耗时信息：
 
-```
+```text
 RunTime: 0.123456
 ```
 

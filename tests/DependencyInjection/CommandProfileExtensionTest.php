@@ -2,29 +2,32 @@
 
 namespace Tourze\CommandProfileBundle\Tests\DependencyInjection;
 
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Tourze\CommandProfileBundle\DependencyInjection\CommandProfileExtension;
 use Tourze\CommandProfileBundle\EventSubscriber\CommandProfileSubscriber;
+use Tourze\PHPUnitSymfonyUnitTest\AbstractDependencyInjectionExtensionTestCase;
 
-class CommandProfileExtensionTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(CommandProfileExtension::class)]
+final class CommandProfileExtensionTest extends AbstractDependencyInjectionExtensionTestCase
 {
     public function testLoad(): void
     {
         $extension = new CommandProfileExtension();
         $container = new ContainerBuilder();
+        $container->setParameter('kernel.environment', 'test');
 
         $extension->load([], $container);
 
-        // 验证服务是否已注册
         $this->assertTrue($container->has(CommandProfileSubscriber::class));
 
-        // 获取服务定义
         $definition = $container->getDefinition(CommandProfileSubscriber::class);
-
-        // 验证服务是否正确配置
         $this->assertTrue($definition->isAutowired());
         $this->assertTrue($definition->isAutoconfigured());
-        $this->assertFalse($definition->isPublic());
+        $this->assertTrue($definition->isPublic());
+        $this->assertTrue($definition->hasTag('as-coroutine'));
     }
 }

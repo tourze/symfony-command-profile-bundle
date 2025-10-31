@@ -3,8 +3,11 @@
 [English](README.md) | [中文](README.zh-CN.md)
 
 [![Latest Version](https://img.shields.io/packagist/v/tourze/symfony-command-profile-bundle.svg?style=flat-square)](https://packagist.org/packages/tourze/symfony-command-profile-bundle)
+[![PHP Version](https://img.shields.io/packagist/php-v/tourze/symfony-command-profile-bundle.svg?style=flat-square)](https://packagist.org/packages/tourze/symfony-command-profile-bundle)
+[![License](https://img.shields.io/packagist/l/tourze/symfony-command-profile-bundle.svg?style=flat-square)](https://packagist.org/packages/tourze/symfony-command-profile-bundle)
 [![Build Status](https://img.shields.io/travis/tourze/symfony-command-profile-bundle/master.svg?style=flat-square)](https://travis-ci.org/tourze/symfony-command-profile-bundle)
 [![Quality Score](https://img.shields.io/scrutinizer/g/tourze/symfony-command-profile-bundle.svg?style=flat-square)](https://scrutinizer-ci.com/g/tourze/symfony-command-profile-bundle)
+[![Code Coverage](https://img.shields.io/scrutinizer/coverage/g/tourze/symfony-command-profile-bundle.svg?style=flat-square)](https://scrutinizer-ci.com/g/tourze/symfony-command-profile-bundle)
 [![Total Downloads](https://img.shields.io/packagist/dt/tourze/symfony-command-profile-bundle.svg?style=flat-square)](https://packagist.org/packages/tourze/symfony-command-profile-bundle)
 
 A Symfony bundle that profiles and outputs the runtime of console commands. It helps you analyze the performance of your custom or built-in Symfony console commands by displaying the execution time after each run.
@@ -44,7 +47,7 @@ php bin/console your:command
 
 At the end of the command output, you will see a line like:
 
-```
+```text
 RunTime: 0.123456
 ```
 
